@@ -156,7 +156,19 @@ class AfxService
             } else {
                 $childrenPropertyName = 'content';
             }
-            $childFusion = self::astNodeListToFusion($payload['children'], $indentation . self::INDENTATION);
+            $childrenTypeProp = Arrays::getValueByPath($payload, 'props.@childrenType');
+            if ($childrenTypeProp) {
+                if ($childrenTypeProp['type'] == 'string') {
+                    $childrenPropertyType = $childrenTypeProp['payload'];
+                } else {
+                    throw new AfxException(
+                        sprintf('@childrenType only supports string payloads %s found', $childrenTypeProp['type'])
+                    );
+                }
+            } else {
+                $childrenPropertyType = 'Neos.Fusion:Array';
+            }
+            $childFusion = self::astNodeListToFusion($payload['children'], $indentation . self::INDENTATION, $childrenPropertyType);
             if ($childFusion) {
                 $fusion .= $indentation . self::INDENTATION . $childrenPropertyName . ' = ' . $childFusion . PHP_EOL;
             }
@@ -170,9 +182,10 @@ class AfxService
     /**
      * @param array $payload
      * @param string $indentation
+     * @param string $propertyType
      * @return string
      */
-    protected static function astNodeListToFusion($payload, $indentation = '')
+    protected static function astNodeListToFusion($payload, $indentation = '', $propertyType = 'Neos.Fusion:Array')
     {
         $index = 1;
 
@@ -198,7 +211,7 @@ class AfxService
         } elseif (count($payload) == 1) {
             return self::astToFusion(array_shift($payload), $indentation);
         } else {
-            $fusion = 'Neos.Fusion:Array {' . PHP_EOL;
+            $fusion = $propertyType . ' {' . PHP_EOL;
             foreach ($payload as $astNode) {
                 // detect key
                 $fusionName = 'item_' . $index;

@@ -515,6 +515,99 @@ EOF;
 
     /**
      * @test
+     */
+    public function commentsBeforeAndAfterNodesAreIgnored()
+    {
+        $afxCode = '<!-- this is a comment --><h1/><!-- another comment -->';
+
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'h1'
+    selfClosingTag = true
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function commentsInsideNodesAreIgnored()
+    {
+        $afxCode = '<h1><!-- this is a comment --></h1>';
+
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'h1'
+    content = ''
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function tagsAndExpressionsInCommentsAreIgnored()
+    {
+        $afxCode = '<h1><!-- <h1 attribute="value">{expression}</h1> --></h1>';
+
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'h1'
+    content = ''
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function commentsInsideNodesMixedNodesAreIgnored()
+    {
+        $afxCode = '<h1><!-- this is a comment --><span>foo</span></h1>';
+
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'h1'
+    content = Neos.Fusion:Tag {
+        tagName = 'span'
+        content = 'foo'
+    }
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function commentsInsideNodesWithMultipleChildrenNodesAreIgnored()
+    {
+        $afxCode = '<h1><!-- a comment --><span>foo</span><!-- second --><span>bar</span><!-- third --></h1>';
+
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'h1'
+    content = Neos.Fusion:Array {
+        item_1 = Neos.Fusion:Tag {
+            tagName = 'span'
+            content = 'foo'
+        }
+        item_2 = Neos.Fusion:Tag {
+            tagName = 'span'
+            content = 'bar'
+        }
+    }
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+
+    /**
+     * @test
      * @expectedException \PackageFactory\Afx\Exception
      */
     public function unclosedTagsRaisesException()
@@ -540,6 +633,27 @@ EOF;
     public function unclosedExpressionRaisesException()
     {
         $afxCode = '<h1 foo={"123" />';
+        AfxService::convertAfxToFusion($afxCode);
+    }
+
+    /**
+     * @test
+     * @expectedException \PackageFactory\Afx\Exception
+     */
+    public function incompletelyStartedCommentsRaiseException()
+    {
+        $afxCode = '<h1><! i forgot to start the comment properly--></h1>';
+        AfxService::convertAfxToFusion($afxCode);
+    }
+
+
+    /**
+     * @test
+     * @expectedException \PackageFactory\Afx\Exception
+     */
+    public function unclosedCommentsRaiseException()
+    {
+        $afxCode = '<h1><!-- i forgot to close this</h1>';
         AfxService::convertAfxToFusion($afxCode);
     }
 }

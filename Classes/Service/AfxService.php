@@ -104,6 +104,7 @@ class AfxService
     protected static function astNodeToFusion($payload, $indentation = '')
     {
         $tagName = $payload['identifier'];
+        $childrenPropertyName = 'content';
 
         // Tag
         if (strpos($tagName, ':') !== false) {
@@ -124,19 +125,34 @@ class AfxService
         }
 
         // Attributes
-        if ($payload['props'] && count($payload['props']) > 0) {
-            foreach ($payload['props'] as $propName => $prop) {
-                if ($propName == '@key' || $propName == '@children') {
-                    continue;
-                } else {
-                    if ($propName{0} === '@') {
-                        $fusionName = $propName;
+        if ($payload['attributes'] && count($payload['attributes']) > 0) {
+            foreach ($payload['attributes'] as $attribute) {
+                if ($attribute['type'] === 'spread') {
+                    // handle spreads
+                } elseif ($attribute['type'] === 'prop') {
+                    $prop = $attribute['payload'];
+                    $propName = $prop['identifier'];
+                    if ($propName === '@key') {
+                        // @key props are handled elsewhere
+                        continue;
+                    } elseif ($propName === '@children') {
+                        if ($prop['type'] === 'string') {
+                            $childrenPropertyName = $prop['payload'];
+                        } else {
+                            throw new AfxException(
+                                sprintf('@children only supports string payloads %s found', $prop['type'])
+                            );
+                        }
                     } else {
-                        $fusionName = $attributePrefix . $propName;
-                    }
-                    $propFusion =  self::astToFusion($prop, $indentation . self::INDENTATION);
-                    if ($propFusion !== null) {
-                        $fusion .= $indentation . self::INDENTATION . $fusionName . ' = ' . $propFusion . PHP_EOL;
+                        if ($propName{0} === '@') {
+                            $fusionName = $propName;
+                        } else {
+                            $fusionName = $attributePrefix . $propName;
+                        }
+                        $propFusion =self::astToFusion($prop, $indentation . self::INDENTATION);
+                        if ($propFusion !== null) {
+                            $fusion .= $indentation . self::INDENTATION . $fusionName . ' = ' . $propFusion . PHP_EOL;
+                        }
                     }
                 }
             }
@@ -144,18 +160,6 @@ class AfxService
 
         // Children
         if ($payload['children'] && count($payload['children']) > 0) {
-            $childrenProp = Arrays::getValueByPath($payload, 'props.@children');
-            if ($childrenProp) {
-                if ($childrenProp['type'] == 'string') {
-                    $childrenPropertyName = $childrenProp['payload'];
-                } else {
-                    throw new AfxException(
-                        sprintf('@children only supports string payloads %s found', $childrenProp['type'])
-                    );
-                }
-            } else {
-                $childrenPropertyName = 'content';
-            }
             $childFusion = self::astNodeListToFusion($payload['children'], $indentation . self::INDENTATION);
             if ($childFusion) {
                 $fusion .= $indentation . self::INDENTATION . $childrenPropertyName . ' = ' . $childFusion . PHP_EOL;
@@ -202,16 +206,20 @@ class AfxService
             foreach ($payload as $astNode) {
                 // detect key
                 $fusionName = 'item_' . $index;
-                if ($keyProperty = Arrays::getValueByPath($astNode, 'payload.props.@key')) {
-                    if ($keyProperty['type'] == 'string') {
-                        $fusionName = $keyProperty['payload'];
-                    } else {
-                        throw new AfxException(
-                            sprintf(
-                                '@key only supports string payloads %s was given',
-                                $astNode['props']['@key']['type']
-                            )
-                        );
+                if ($astNode['type'] === 'node' && $astNode['payload']['attributes'] !== []) {
+                    foreach ($astNode['payload']['attributes'] as $attribute) {
+                        if ($attribute['type'] === 'prop' && $attribute['payload']['identifier'] === '@key') {
+                            if ($attribute['payload']['type'] === 'string') {
+                                $fusionName = $attribute['payload']['payload'];
+                            } else {
+                                throw new AfxException(
+                                    sprintf(
+                                        '@key only supports string payloads %s was given',
+                                        $attribute['payload']['type']
+                                    )
+                                );
+                            }
+                        }
                     }
                 }
 

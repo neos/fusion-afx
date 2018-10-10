@@ -31,11 +31,13 @@ class AfxService
     /**
      * @param array $astNode
      * @param string $indentation
-     * @return string
+     * @return string|null
      */
     protected static function astToFusion($ast, $indentation = '')
     {
         switch ($ast['type']) {
+            case 'comment':
+                return null;
             case 'expression':
                 return self::astExpressionToFusion($ast['payload'], $indentation);
                 break;
@@ -174,11 +176,14 @@ class AfxService
     /**
      * @param array $payload
      * @param string $indentation
-     * @return string
+     * @return string|null
      */
     protected static function astNodeListToFusion($payload, $indentation = '')
     {
         $index = 1;
+
+        // ignore comments
+        $payload = array_filter($payload, function ($astNode) { return ($astNode['type'] !== 'comment'); });
 
         // ignore blank text if it is connected to a newline
         $payload = array_map(function ($astNode) {

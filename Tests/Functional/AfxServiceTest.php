@@ -605,6 +605,37 @@ EOF;
         $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
     }
 
+    /**
+     * @test
+     */
+    public function spreadsAreEvaluetedForFusionObjectTags()
+    {
+        $afxCode = '<Vendor.Site:Prototype {...contextValue} />';
+
+        $expectedFusion = <<<'EOF'
+Vendor.Site:Prototype {
+    @spread.spread_1 = ${contextValue}
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function spreadsAreEvaluetedForHtmlTags()
+    {
+        $afxCode = '<h1 {...contextValue} />';
+
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'h1'
+    selfClosingTag = true
+    attributes.@spread.spread_1 = ${contextValue}
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
 
     /**
      * @test

@@ -290,6 +290,112 @@ EOF;
     /**
      * @test
      */
+    public function metaAttributesWithoutNamesGetAnAutomatedNamesInHtmlTags(): void
+    {
+        $afxCode = <<<'EOF'
+<div
+    @any="1"
+    @if="2"
+    @any="3" 
+    @process="4"
+    @any="5" 
+></div>
+EOF;
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'div'
+    @any = '1'
+    @if._meta_1 = '2'
+    @any = '3'
+    @process._meta_2 = '4'
+    @any = '5'
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function metaAttributesWithoutNamesGetAnAutomatedNamesInFusionTags(): void
+    {
+        $afxCode = <<<'EOF'
+<Neos.Fusion:Tag  
+    @any="1"
+    @if="2"
+    @any="3" 
+    @process="4"
+    @any="5" 
+></Neos.Fusion:Tag>
+EOF;
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    @any = '1'
+    @if._meta_1 = '2'
+    @any = '3'
+    @process._meta_2 = '4'
+    @any = '5'
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function attributesWithoutNamesGetAnAutomatedNamesInHtmlTags_(): void
+    {
+        $afxCode = <<<'EOF'
+<div
+    title.@any="1"
+    title.@if="2"
+    title.@any="3" 
+    title.@process="4"
+    title.@any="5" 
+></div>
+EOF;
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    tagName = 'div'
+    attributes.title.@any = '1'
+    attributes.title.@if._meta_1 = '2'
+    attributes.title.@any = '3'
+    attributes.title.@process._meta_2 = '4'
+    attributes.title.@any = '5'
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
+    public function attributesWithoutNamesGetAnAutomatedNamesInFusionTags_(): void
+    {
+        $afxCode = <<<'EOF'
+<Neos.Fusion:Tag  
+    title.@any="1"
+    title.@if="2"
+    title.@any="3" 
+    title.@process="4"
+    title.@any="5" 
+></Neos.Fusion:Tag>
+EOF;
+        $expectedFusion = <<<'EOF'
+Neos.Fusion:Tag {
+    title.@any = '1'
+    title.@if._meta_1 = '2'
+    title.@any = '3'
+    title.@process._meta_2 = '4'
+    title.@any = '5'
+}
+EOF;
+        $this->assertEquals($expectedFusion, AfxService::convertAfxToFusion($afxCode));
+    }
+
+    /**
+     * @test
+     */
     public function contentOfHtmlTagsIsRenderedAsFusionContent(): void
     {
         $afxCode = '<h1>Fooo</h1>';

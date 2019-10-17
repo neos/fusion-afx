@@ -31,7 +31,7 @@ prototype(Vendor.Site:Example) < prototype(Neos.Fusion:Component) {
     renderer = afx`
        <div>
          <h1 @key="headline" class="headline">{props.title}</h1>
-         <h2 @key="subheadline" class="subheadline" @if.hasSubtitle={props.subtitle ? true : false}>{props.subtitle}</h2>
+         <h2 @key="subheadline" class="subheadline" @if={props.subtitle ? true : false}>{props.subtitle}</h2>
          <Vendor.Site:Image @key="image" uri={props.imageUri} />
        </div>
     `
@@ -59,7 +59,7 @@ prototype(Vendor.Site:Example) < prototype(Neos.Fusion:Component) {
                 tagName = 'h2'
                 content = ${props.subtitle}
                 attributes.subheadline = 'subheadline'
-                @if.hasSubtitle = ${props.subtitle ? true : false}
+                @if._meta_1 = ${props.subtitle ? true : false}
             }
             image = Vendor.Site:Image {
                 uri = ${props.imageUri}
@@ -79,7 +79,7 @@ HTML-Tags are converted to `Neos.Fusion:Tag` Objects. All attributes of the afx-
  
 The following html: 
 ```
-<h1 class="headline" @if.hasHeadline={props.headline ? true : false}>{props.headline}</h1>
+<h1 class="headline" @if={props.headline ? true : false}>{props.headline}</h1>
 ```
 Is transpiled to:
 ```
@@ -87,7 +87,7 @@ Neos.Fusion:Tag {
     tagName = 'h1'
     attributes.class = 'headline'
     content = ${props.headline}
-    @if.hasHeadline = ${props.headline ? true : false}
+    @if._meta_1 = ${props.headline ? true : false}
 }
 ``` 
 
@@ -273,6 +273,9 @@ Attention: `@path`, `@children` and `@key` only support string-values and no exp
 
 All other meta attributes are directly added to the generated prototype and can be used for @if or @process statements. 
 
+When a meta attribute ends with `@if` or `@process` without a name the afx will automatically append a unique key like 
+`_meta_xxx`.  
+
 ### Whitespace and Newlines
  
 AFX is not html and makes some simplifications to the code to optimize the generated fusion and allow a structured notation 
@@ -333,7 +336,7 @@ prototype(Vendor.Site:IterationExample) < prototype(Neos.Fusion:Component) {
     items = null
     
     renderer = afx`
-        <ul @if.has={props.items ? true : false}>
+        <ul @if={props.items ? true : false}>
         <Neos.Fusion:Collection collection={props.items} itemName="item">
             <li @path='itemRenderer'>
                 <Vendor.Site:LinkExample {...item} />

@@ -115,10 +115,16 @@ class AfxService
     protected static function propListToFusion($payload, $attributePrefix, $indentation = '')
     {
         $fusion = '';
+        $index = 0;
         foreach ($payload as $attribute) {
             if ($attribute['type'] === 'prop') {
                 $prop = $attribute['payload'];
                 $propName = $prop['identifier'];
+                // add automatic keys to *.@if and *.@process
+                if (fnmatch('*@if', $propName) || fnmatch('*@process', $propName)) {
+                    $index ++;
+                    $propName .= '._meta_' . $index;
+                }
                 $propFusion = self::astToFusion($prop, $indentation . self::INDENTATION);
                 if ($propFusion !== null) {
                     $fusion .= $indentation . self::INDENTATION . $attributePrefix . $propName . ' = ' . $propFusion . PHP_EOL;

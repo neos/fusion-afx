@@ -121,7 +121,9 @@ class AfxService
                 $prop = $attribute['payload'];
                 $propName = $prop['identifier'];
                 // add automatic keys to *.@if and *.@process
-                if (fnmatch('*@if', $propName) || fnmatch('*@process', $propName)) {
+                if (preg_match('/^(.+\\.@if|@if)$/u', $propName)
+                    || preg_match('/^(.+\\.@process|@process)$/u', $propName)
+                ) {
                     $index ++;
                     $propName .= '._meta_' . $index;
                 }

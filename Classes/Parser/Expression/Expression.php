@@ -24,10 +24,10 @@ class Expression
 {
     /**
      * @param Lexer $lexer
-     * @return string
+     * @return array
      * @throws AfxParserException
      */
-    public static function parse(Lexer $lexer): string
+    public static function parse(Lexer $lexer): array
     {
         $contents = '';
         $braceCount = 0;
@@ -37,7 +37,7 @@ class Expression
         } else {
             throw new AfxParserException('Expression without braces', 1557860467);
         }
-
+        $fromOffset = $lexer->getCharacterPosition();
         while (true) {
             if ($lexer->isEnd()) {
                 throw new AfxParserException(sprintf('Unfinished Expression "%s"', $contents), 1557860496);
@@ -49,8 +49,13 @@ class Expression
 
             if ($lexer->isClosingBrace()) {
                 if ($braceCount === 0) {
+                    $toOffset = $lexer->getCharacterPosition();
                     $lexer->consume();
-                    return $contents;
+                    return [
+                        'from' => $fromOffset,
+                        'to' => $toOffset,
+                        'contents' => $contents
+                    ];
                 }
 
                 $braceCount--;

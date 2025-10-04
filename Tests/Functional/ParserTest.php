@@ -92,6 +92,36 @@ class ParserTest extends TestCase
     /**
      * @test
      */
+    public function shouldParseSingleTagWithContentExpression(): void
+    {
+        $parser = new Parser('<div>{String.uppercase("test")}</div>');
+
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'node',
+                    'payload' => [
+                        'identifier' => 'div',
+                        'attributes' => [],
+                        'children' => [
+                            0 => [
+                                'type' => 'expression',
+                                'payload' => 'String.uppercase("test")',
+                                'from' => 5,
+                                'to' => 31
+                            ]
+                        ],
+                        'selfClosing' => false
+                    ]
+                ]
+            ],
+            $parser->parse()
+        );
+    }
+
+    /**
+     * @test
+     */
     public function shouldParseSingleTagWithZeroAsContent(): void
     {
         $parser = new Parser('<div>0</div>');
@@ -206,6 +236,40 @@ class ParserTest extends TestCase
                                     'type' => 'string',
                                     'payload' => 'value',
                                     'identifier' => 'prop'
+                                ]
+                            ]
+                        ],
+                        'children' => [],
+                        'selfClosing' => true
+                    ]
+                ]
+            ],
+            $parser->parse()
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function shouldParseSingleSelfClosingTagWithSingleAttributeExpression(): void
+    {
+        $parser = new Parser('<div prop={"value" + "a"}/>');
+
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'node',
+                    'payload' => [
+                        'identifier' => 'div',
+                        'attributes' => [
+                            [
+                                'type' => 'prop',
+                                'payload' => [
+                                    'type' => 'expression',
+                                    'payload' => '"value" + "a"',
+                                    'identifier' => 'prop',
+                                    'from' => 10,
+                                    'to' => 25
                                 ]
                             ]
                         ],
@@ -429,7 +493,9 @@ class ParserTest extends TestCase
                                 'payload' => [
                                     'type' => 'expression',
                                     'payload' => 'item'
-                                ]
+                                ],
+                                'from' => 5,
+                                'to' => 14
                             ]
                         ],
                         'children' => [],
@@ -468,14 +534,18 @@ class ParserTest extends TestCase
                                 'payload' => [
                                     'type' => 'expression',
                                     'payload' => 'item',
-                                ]
+                                ],
+                                'from' => 18,
+                                'to' => 27,
                             ],
                             [
                                 'type' => 'prop',
                                 'payload' => [
                                     'type' => 'expression',
                                     'payload' => 'expression',
-                                    'identifier' => 'bar'
+                                    'identifier' => 'bar',
+                                    'from' => 32,
+                                    'to' => 44,
                                 ]
                             ]
                         ],

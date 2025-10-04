@@ -41,7 +41,6 @@ class Spread
             throw new AfxParserException('Spread without braces', 1557860522);
         }
 
-        $fromOffset = $lexer->getCharacterPosition();
         while (true) {
             if ($lexer->isEnd()) {
                 throw new AfxParserException(sprintf('Unfinished Spread "%s"', $contents), 1557860526);
@@ -53,15 +52,10 @@ class Spread
 
             if ($lexer->isClosingBrace()) {
                 if ($braceCount === 0) {
-                    $toOffset = $lexer->getCharacterPosition();
                     $lexer->consume();
                     return [
                         'type' => 'expression',
-                        'payload' => [
-                            'from' => $fromOffset,
-                            'to' => $toOffset,
-                            'contents' => $contents
-                        ]
+                        'payload' => $contents
                     ];
                 }
 

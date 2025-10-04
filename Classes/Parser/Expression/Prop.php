@@ -46,7 +46,9 @@ class Prop
                 case $lexer->isOpeningBrace():
                     $value = [
                         'type' => 'expression',
+                        'from' => $lexer->getCharacterPosition(),
                         'payload' => Expression::parse($lexer),
+                        'to' => $lexer->getCharacterPosition(),
                         'identifier' => $identifier
                     ];
                     break;

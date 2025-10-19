@@ -48,9 +48,9 @@ class Node
                     if ($lexer->isOpeningBrace()) {
                         $attributes[] = [
                             'type' => 'spread',
-                            'from' => $lexer->getCharacterPosition(),
+                            'from' => $lexer->getCharacterPosition() + 4,
                             'payload' => Spread::parse($lexer),
-                            'to' => $lexer->getCharacterPosition()
+                            'to' => $lexer->getCharacterPosition() - 2
                         ];
                     } else {
                         $attributes[] = [

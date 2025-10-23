@@ -41,6 +41,26 @@ class ParserTest extends TestCase
     /**
      * @test
      */
+    public function shouldParseASingleExpression(): void
+    {
+        $parser = new Parser('{String.uppercase("test")}');
+
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'expression',
+                    'payload' => 'String.uppercase("test")',
+                    'from' => 1,
+                    'to' => 24
+                ]
+            ],
+            $parser->parse()
+        );
+    }
+
+    /**
+     * @test
+     */
     public function shouldParseSingleTag(): void
     {
         $parser = new Parser('<div></div>');
@@ -107,8 +127,8 @@ class ParserTest extends TestCase
                             0 => [
                                 'type' => 'expression',
                                 'payload' => 'String.uppercase("test")',
-                                'from' => 5,
-                                'to' => 31
+                                'from' => 6,
+                                'to' => 29
                             ]
                         ],
                         'selfClosing' => false
@@ -268,8 +288,8 @@ class ParserTest extends TestCase
                                     'type' => 'expression',
                                     'payload' => '"value" + "a"',
                                     'identifier' => 'prop',
-                                    'from' => 10,
-                                    'to' => 25
+                                    'from' => 11,
+                                    'to' => 23
                                 ]
                             ]
                         ],
@@ -494,8 +514,8 @@ class ParserTest extends TestCase
                                     'type' => 'expression',
                                     'payload' => 'item'
                                 ],
-                                'from' => 5,
-                                'to' => 14
+                                'from' => 9,
+                                'to' => 12
                             ]
                         ],
                         'children' => [],
@@ -535,8 +555,8 @@ class ParserTest extends TestCase
                                     'type' => 'expression',
                                     'payload' => 'item',
                                 ],
-                                'from' => 18,
-                                'to' => 27,
+                                'from' => 22,
+                                'to' => 25,
                             ],
                             [
                                 'type' => 'prop',
@@ -544,8 +564,8 @@ class ParserTest extends TestCase
                                     'type' => 'expression',
                                     'payload' => 'expression',
                                     'identifier' => 'bar',
-                                    'from' => 32,
-                                    'to' => 44,
+                                    'from' => 33,
+                                    'to' => 42,
                                 ]
                             ]
                         ],

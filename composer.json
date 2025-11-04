@@ -16,7 +16,7 @@
     "neos/fusion": "self.version"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.0"
+    "phpunit/phpunit": "^9.6"
   },
   "autoload": {
     "psr-4": {
